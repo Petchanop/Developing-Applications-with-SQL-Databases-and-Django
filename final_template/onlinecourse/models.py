@@ -108,16 +108,16 @@ class Question(models.Model):
     question_text = models.CharField(null=False, max_length=1000)
     # question grade/mark
     question_grade = models.IntegerField()
-    course = models.ManyToManyField
+    course = models.ManyToManyField(Course)
 
     # <HINT> A sample model method to calculate if learner get the score of the question
-    #def is_get_score(self, selected_ids):
-    #    all_answers = self.choice_set.filter(is_correct=True).count()
-    #    selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
-    #    if all_answers == selected_correct:
-    #        return True
-    #    else:
-    #        return False
+    def is_get_score(self, selected_ids):
+       all_answers = self.choice_set.filter(is_correct=True).count()
+       selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
+       if all_answers == selected_correct:
+           return True
+       else:
+           return False
 
 
 #  <HINT> Create a Choice Model with:
@@ -126,13 +126,15 @@ class Question(models.Model):
     # Choice content
     # Indicate if this choice of the question is a correct one or not
     # Other fields and methods you would like to design
-# class Choice(models.Model):
-
+class Choice(models.Model):
+    choice_content = models.CharField(null=False, max_length=1000)
+    choice_answer = models.BooleanField()
+    question = model.ManyToManyField(Question)
 # <HINT> The submission model
 # One enrollment could have multiple submission
 # One submission could have multiple choices
 # One choice could belong to multiple submissions
-#class Submission(models.Model):
-#    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
-#    chocies = models.ManyToManyField(Choice)
-#    Other fields and methods you would like to design
+class Submission(models.Model):
+   enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+   chocies = models.ManyToManyField(Choice)
+   Other fields and methods you would like to design
