@@ -8,7 +8,12 @@ from .models import Course, Lesson, Instructor, Learner
 class LessonInline(admin.StackedInline):
     model = Lesson
     extra = 5
+    
+class QuestionInline(admin.StackedInline):
+    model = Question
 
+class ChoiceInline(admin.StackedInline):
+    model = Choice
 
 # Register your models here.
 class CourseAdmin(admin.ModelAdmin):
