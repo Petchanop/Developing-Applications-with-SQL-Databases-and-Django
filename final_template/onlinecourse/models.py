@@ -119,6 +119,8 @@ class Question(models.Model):
        else:
            return False
 
+    def __str__(self):
+        return "Name: " + self.question_text
 
 #  <HINT> Create a Choice Model with:
     # Used to persist choice content for a question
@@ -127,10 +129,12 @@ class Question(models.Model):
     # Indicate if this choice of the question is a correct one or not
     # Other fields and methods you would like to design
 class Choice(models.Model):
+    lesson =  models.ForeignKey(Lesson, on_delete=models.CASCADE)
     choice_content = models.CharField(null=False, max_length=1000)
     choice_answer = models.BooleanField()
     question = models.ManyToManyField(Question)
-
+    def __str__(self):
+        return "Choice for: " + self.question_text
 # <HINT> The submission model
 # One enrollment could have multiple submission
 # One submission could have multiple choices
