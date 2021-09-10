@@ -74,7 +74,8 @@ class Lesson(models.Model):
     order = models.IntegerField(default=0)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     content = models.TextField()
-
+    def __str__(self):
+        return self.title
 
 # Enrollment model
 # <HINT> Once a user enrolled a class, an enrollment entry should be created between the user and course
@@ -132,15 +133,16 @@ class Choice(models.Model):
     lesson =  models.ForeignKey(Lesson, on_delete=models.CASCADE)
     choice_content = models.CharField(null=False, max_length=1000)
     choice_answer = models.BooleanField()
-    question = models.ManyToManyField(Question)
+    question = models.ForeignKey(Question, models.SET_NULL,null=True,)
+    
     def __str__(self):
-        return "Choice for: " + self.question_text
+        return self.choice_content
 # <HINT> The submission model
 # One enrollment could have multiple submission
 # One submission could have multiple choices
 # One choice could belong to multiple submissions
 class Submission(models.Model):
    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
-   chocies = models.ManyToManyField(Choice)
+   chocies = models.ManyToManyField(Choice)   
    Submission = models.ForeignKey('Submission', on_delete=models.CASCADE)
 #    Other fields and methods you would like to design
