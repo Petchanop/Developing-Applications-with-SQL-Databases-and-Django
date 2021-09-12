@@ -137,10 +137,10 @@ def extract_answers(request):
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
 def show_exam_result(request, course_id, submission_id):
-    course = get_object_or_404(Course, pk=course_id)
+    submit = submit(request, course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
     choice = get_object_or_404(Choice, pk=submission_id)
     answer = extract_answers(request)
-    return 
+    return redirect()
 
 
