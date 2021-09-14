@@ -148,8 +148,7 @@ def submit(request, course_id):
         # Get the selected choice ids from the submission record
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
-def show_exam_result(request, course_id, submission_id):
-    
+def show_exam_result(request, course_id, submission_id):    
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
     answers = get_object_or_404(Choice, pk=submission_id)
