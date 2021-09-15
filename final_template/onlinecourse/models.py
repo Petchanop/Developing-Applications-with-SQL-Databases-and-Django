@@ -145,4 +145,8 @@ class Submission(models.Model):
    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
    chocies = models.ManyToManyField(Choice)   
    Submission = models.ForeignKey('Submission', on_delete=models.CASCADE)
+   id = models.UUIDField(
+         primary_key = True,
+         default = uuid.uuid4,
+         editable = False)
 #    Other fields and methods you would like to design

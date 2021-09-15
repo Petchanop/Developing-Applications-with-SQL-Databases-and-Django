@@ -1,3 +1,5 @@
+from django.db.models import DateTimeField
+from datetime import timezone
 from django.http.response import HttpResponse
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
@@ -113,7 +115,7 @@ def enroll(request, course_id):
          # Redirect to show_exam_result with the submission id
 def submit(request, course_id):
      user = get_object_or_404(User, pk=course_id)
-     course = get_object_or_404(Course, pk=course_id)     
+     course = get_object_or_404(Course, pk=course_id)  
      enrollment = Enrollment.objects.get(user=user ,course=course)
      submitted_anwsers = []
      for key in request.POST:
