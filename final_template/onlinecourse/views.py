@@ -116,22 +116,15 @@ def enroll(request, course_id):
 def submit(request, course_id):
      user = get_object_or_404(User, pk=course_id)
      course = get_object_or_404(Course, pk=course_id)  
-     enrollment = Enrollment.objects.get(user=user ,course=course)
-     submitted_anwsers = []
+     enrollment = Enrollment.objects.get(user=user ,course=course) 
+     submission = Submission.objects.create(enrollment=enrollment,user=user.username)  
      for key in request.POST:
-       if key.startswith('choice'):
-           value = request.POST[key]
-           choice_id = int(value)
-           submitted_anwsers.append(choice_id)           
-     submission = Submission.objects.create(enrollment=enrollment)
-     submission.choice = submitted_anwsers
+         if key.startswith('choice'):
+             value = request.POST[key]
+             choice_id = int(value)
+             submission.choice_ids.append(choice_id)     
      submission.save()
-     return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(course.id,submission.id)))
-     
-     
-     
-    #  HttpResponseRedirect(reverse('onlinecourse:exam_result', args=(course.id,submission.id)))
-    
+     return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(course.id,submission.id,)))    
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
 # def extract_answers(request):
@@ -153,12 +146,16 @@ def submit(request, course_id):
 def show_exam_result(request, course_id, submission_id):    
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
-    answers = get_object_or_404(Choice, pk=submission_id)
-    grade = 0
-    for answer in answers:
+    choices_submit = Submission.objects.get(pk=submission_id)
+    score = 0
+    exam_score = 0
+    for choice in choices_submit.choice_ids:
+        # exam = Question.objects.get(pk=
+        answer = get_object_or_404(Choice, pk=choice)
         if answer.choice_answer:
-            grade += 1
-        context = {'grade': grade}
-    return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
+            score += 1
+        # exam_score += answer.question_grade
+    # grade = (score/exam_score)*100    
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', {'grade': score ,'course':course})
 
 
