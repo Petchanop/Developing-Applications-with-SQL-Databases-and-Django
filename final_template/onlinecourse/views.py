@@ -117,13 +117,17 @@ def submit(request, course_id):
      user = get_object_or_404(User, pk=course_id)
      course = get_object_or_404(Course, pk=course_id)  
      enrollment = Enrollment.objects.get(user=user ,course=course) 
-     submission = Submission.objects.create(enrollment=enrollment,user=user.username)  
+     submission = Submission.objects.create(enrollment=enrollment,user=user.username)
+     
      for key in request.POST:
-         if key.startswith('choice'):
-             value = request.POST[key]
-             choice_id = int(value)
-             submission.choice_ids.append(choice_id)     
-     submission.save()
+        if key.startswith('choice'):
+            value = request.POST[key]
+            choice_id = int(value)
+            # submission.choice_ids.append(choice_id)
+            choice_ob = get_object_or_404(Choice, pk=choice_id)
+            submission.choice_set.add(choice_ob)
+    #  submission.choice_ids = submitted_anwsers
+     submission.save()      
      return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(course.id,submission.id,)))    
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
@@ -146,13 +150,14 @@ def submit(request, course_id):
 def show_exam_result(request, course_id, submission_id):    
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
-    choices_submit = Submission.objects.get(pk=submission_id)
+    choices_submit = Choice.objects.all().filter(choice_submitted=submission_id)
     score = 0
     exam_score = 0
-    for choice in choices_submit.choice_ids:
+    for choice in choices_submit:
+        
         # exam = Question.objects.get(pk=
-        answer = get_object_or_404(Choice, pk=choice)
-        if answer.choice_answer:
+        # answer = get_object_or_404(Choice, pk=choice)
+        if choice.choice_answer:
             score += 1
         # exam_score += answer.question_grade
     # grade = (score/exam_score)*100    

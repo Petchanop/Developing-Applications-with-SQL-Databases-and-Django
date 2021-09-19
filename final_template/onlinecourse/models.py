@@ -108,7 +108,7 @@ class Question(models.Model):
     # question grade/mark
     question_grade = models.IntegerField()
     course = models.ManyToManyField(Course)
-    question_choice= models.ManyToManyField(Lesson,through='Choice',through_fields=('question','lesson'),related_name="choices",)
+    
     # <HINT> A sample model method to calculate if learner get the score of the question
     def is_get_score(self, selected_ids):
        all_answers = self.choice_set.filter(is_correct=True).count()
@@ -128,11 +128,10 @@ class Question(models.Model):
     # Indicate if this choice of the question is a correct one or not
     # Other fields and methods you would like to design
 class Choice(models.Model):
-    lesson =  models.ForeignKey(Lesson, on_delete=models.CASCADE,)
     choice_content = models.CharField(null=False, max_length=1000)
     choice_answer = models.BooleanField()
-    question = models.ForeignKey(Question, models.SET_NULL,null=True,) 
-    choice_submit = models.ManyToManyField(Question,through='Submission',related_name="choices",)   
+    question = models.ForeignKey(Question, models.SET_NULL,null=True) 
+    choice_submitted = models.ManyToManyField('Submission') 
     def __str__(self):
         return self.choice_content
 # <HINT> The submission model
@@ -142,12 +141,7 @@ class Choice(models.Model):
 class Submission(models.Model):
    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
    user = models.CharField(null=True,max_length=100) 
-   choice = models.ForeignKey(Choice,models.SET_NULL,null=True,)
-   question = models.ForeignKey(Question, models.SET_NULL,null=True,related_name='submission')   
-   date_submitted  = models.DateField(default=now, editable=False)
-   
-   choice_ids = []
-   
+   date_submitted  = models.DateField(default=now, editable=False)  
    
    
 #    Other fields and methods you would like to design
