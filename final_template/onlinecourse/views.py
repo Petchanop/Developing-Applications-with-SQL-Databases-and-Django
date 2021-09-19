@@ -123,10 +123,8 @@ def submit(request, course_id):
         if key.startswith('choice'):
             value = request.POST[key]
             choice_id = int(value)
-            # submission.choice_ids.append(choice_id)
             choice_ob = get_object_or_404(Choice, pk=choice_id)
             submission.choice_set.add(choice_ob)
-    #  submission.choice_ids = submitted_anwsers
      submission.save()      
      return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(course.id,submission.id,)))    
 
@@ -139,8 +137,33 @@ def submit(request, course_id):
 #            choice_id = int(value)
 #            submitted_anwsers.append(choice_id)
 #    return submitted_anwsers
+def get_exam_score(choices_submit):
+    if not choices_submit:
+        return 0 
+    else:
+        score = 0
+        for choice in choices_submit:
+            if choice.choice_answer:
+                score += 1
+    return score
 
-
+def get_Lesson_grade(choices_submit):
+    if not choices_submit:
+        return 1
+    else:
+        question_id = []
+        for choice in choices_submit:
+            question_grade = Question.objects.filter(choice__id__contains=choice.id)
+            if question_grade[0].id not in question_id:
+                question_id.append(question_grade[0].id)
+    
+        exam_grade = 0
+        for id in question_id:
+            grade = get_object_or_404(Question, pk=id)
+            exam_grade += grade.question_grade
+        
+    return exam_grade
+    
 # <HINT> Create an exam result view to check if learner passed exam and show their question results and result for each question,
 # you may implement it based on the following logic:
         # Get course and submission based on their ids
@@ -151,16 +174,9 @@ def show_exam_result(request, course_id, submission_id):
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
     choices_submit = Choice.objects.all().filter(choice_submitted=submission_id)
-    score = 0
-    exam_score = 0
-    for choice in choices_submit:
-        
-        # exam = Question.objects.get(pk=
-        # answer = get_object_or_404(Choice, pk=choice)
-        if choice.choice_answer:
-            score += 1
-        # exam_score += answer.question_grade
-    # grade = (score/exam_score)*100    
-    return render(request, 'onlinecourse/exam_result_bootstrap.html', {'grade': score ,'course':course})
+    exam_grade = get_Lesson_grade(choices_submit)
+    score = get_exam_score(choices_submit)    
+    grade = round((score/exam_grade)*100)    
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', {'grade': grade ,'course':course,})
 
 

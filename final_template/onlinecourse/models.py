@@ -128,10 +128,10 @@ class Question(models.Model):
     # Indicate if this choice of the question is a correct one or not
     # Other fields and methods you would like to design
 class Choice(models.Model):
+    question = models.ForeignKey(Question, models.SET_NULL,null=True)
     choice_content = models.CharField(null=False, max_length=1000)
-    choice_answer = models.BooleanField()
-    question = models.ForeignKey(Question, models.SET_NULL,null=True) 
-    choice_submitted = models.ManyToManyField('Submission') 
+    choice_answer = models.BooleanField()     
+    choice_submitted = models.ManyToManyField('Submission',editable=False) 
     def __str__(self):
         return self.choice_content
 # <HINT> The submission model
