@@ -34,7 +34,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
 # <HINT> Register Question and Choice models here
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ['user','id','date_submitted']
+    list_display = ['user','id','date_submitted','time']
     date_hierarchy = 'date_submitted'
     
 admin.site.register(Course, CourseAdmin)

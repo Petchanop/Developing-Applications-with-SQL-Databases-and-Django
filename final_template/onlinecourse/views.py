@@ -118,13 +118,16 @@ def submit(request, course_id):
      course = get_object_or_404(Course, pk=course_id)  
      enrollment = Enrollment.objects.get(user=user ,course=course) 
      submission = Submission.objects.create(enrollment=enrollment,user=user.username)
-     
      for key in request.POST:
         if key.startswith('choice'):
             value = request.POST[key]
             choice_id = int(value)
             choice_ob = get_object_or_404(Choice, pk=choice_id)
             submission.choice_set.add(choice_ob)
+        if key.startswith('lesson'):
+            value = request.POST[key]
+            lesson_id = int(value)
+            submission.lesson_id = lesson_id
      submission.save()      
      return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(course.id,submission.id,)))    
 
@@ -139,31 +142,31 @@ def submit(request, course_id):
 #    return submitted_anwsers
 def get_exam_score(choices_submit):
     if not choices_submit:
-        return 0 
+        score_choice = { 'result':0,'ids':[] }
+        return  score_choice
     else:
+        choice_ids = []
         score = 0
         for choice in choices_submit:
             if choice.choice_answer:
                 score += 1
-    return score
+            choice_ids.append(choice.id)
+    score_choice = { 'result':score,'ids':choice_ids }
+    return score_choice
 
-def get_Lesson_grade(choices_submit):
-    if not choices_submit:
+def get_Lesson_grade(question):
+    exam_grade = 0
+    if not question:
         return 1
     else:
-        question_id = []
-        for choice in choices_submit:
-            question_grade = Question.objects.filter(choice__id__contains=choice.id)
-            if question_grade[0].id not in question_id:
-                question_id.append(question_grade[0].id)
-    
-        exam_grade = 0
-        for id in question_id:
-            grade = get_object_or_404(Question, pk=id)
-            exam_grade += grade.question_grade
-        
+        for grade in question:
+            exam_grade += grade.question_grade        
     return exam_grade
     
+def get_lesson(lesson_id):     
+    lesson = get_object_or_404(Lesson, pk=lesson_id) 
+    return lesson
+        
 # <HINT> Create an exam result view to check if learner passed exam and show their question results and result for each question,
 # you may implement it based on the following logic:
         # Get course and submission based on their ids
@@ -173,10 +176,12 @@ def get_Lesson_grade(choices_submit):
 def show_exam_result(request, course_id, submission_id):    
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
-    choices_submit = Choice.objects.all().filter(choice_submitted=submission_id)
-    exam_grade = get_Lesson_grade(choices_submit)
-    score = get_exam_score(choices_submit)    
-    grade = round((score/exam_grade)*100)    
-    return render(request, 'onlinecourse/exam_result_bootstrap.html', {'grade': grade ,'course':course,})
+    choices_submit = Choice.objects.all().filter(choice_submitted=submission_id) 
+    score_choice = get_exam_score(choices_submit)
+    lesson = get_lesson(submission.lesson_id)    
+    question = Question.objects.all().filter(lesson_id=lesson.id)
+    exam_grade = get_Lesson_grade(question)
+    grade = round((score_choice.get('result')/exam_grade)*100)    
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', {'grade': grade ,'course':course,'lesson': lesson, 'choice_send':score_choice.get('ids')})
 
 

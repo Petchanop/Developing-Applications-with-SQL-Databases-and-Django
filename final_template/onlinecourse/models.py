@@ -142,6 +142,8 @@ class Submission(models.Model):
    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
    user = models.CharField(null=True,max_length=100) 
    date_submitted  = models.DateField(default=now, editable=False)  
+   time = models.TimeField(default=now, editable=False)
+   lesson_id = models.IntegerField(null=True)
    
    
 #    Other fields and methods you would like to design
