@@ -140,28 +140,32 @@ def submit(request, course_id):
 #            choice_id = int(value)
 #            submitted_anwsers.append(choice_id)
 #    return submitted_anwsers
-def get_exam_score(choices_submit):
+def get_submit_choice(choices_submit):
+    choice_ids = []
+    for choice in choices_submit :
+        choice_ids.append(choice.id)
+    return choice_ids
+        
+
+def get_exam_score(questions,choices_submit):
     if not choices_submit:
         score_choice = { 'result':0,'ids':[] }
-        return  score_choice
+        return  score_choice 
     else:
-        choice_ids = []
+        exam_grade = 0
         score = 0
-        for choice in choices_submit:
-            if choice.choice_answer:
-                score += 1
-            choice_ids.append(choice.id)
-    score_choice = { 'result':score,'ids':choice_ids }
-    return score_choice
-
-def get_Lesson_grade(question):
-    exam_grade = 0
-    if not question:
-        return 1
-    else:
-        for grade in question:
-            exam_grade += grade.question_grade        
-    return exam_grade
+        for question in questions:
+            choice_list = Choice.objects.all().filter(question_id=question.id)            
+            for choice in choice_list:
+                if choice.choice_answer and choice in choices_submit:
+                    score += 1
+                elif not choice.choice_answer and  choice in choices_submit:
+                    score = 0            
+            exam_grade += question.question_grade
+        choice_ids = get_submit_choice(choices_submit)
+        grade = round((score/exam_grade)*100) 
+        score_choice = { 'result':grade,'ids':choice_ids }
+        return score_choice
     
 def get_lesson(lesson_id):     
     lesson = get_object_or_404(Lesson, pk=lesson_id) 
@@ -177,11 +181,9 @@ def show_exam_result(request, course_id, submission_id):
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
     choices_submit = Choice.objects.all().filter(choice_submitted=submission_id) 
-    score_choice = get_exam_score(choices_submit)
     lesson = get_lesson(submission.lesson_id)    
-    question = Question.objects.all().filter(lesson_id=lesson.id)
-    exam_grade = get_Lesson_grade(question)
-    grade = round((score_choice.get('result')/exam_grade)*100)    
-    return render(request, 'onlinecourse/exam_result_bootstrap.html', {'grade': grade ,'course':course,'lesson': lesson, 'choice_send':score_choice.get('ids')})
+    questions = Question.objects.all().filter(lesson_id=lesson.id)    
+    exam_result = get_exam_score(questions,choices_submit)
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', {'grade': exam_result.get('result') ,'course':course,'lesson': lesson, 'choice_send':exam_result.get('ids')})
 
 
