@@ -152,19 +152,25 @@ def get_exam_score(questions,choices_submit):
         score_choice = { 'result':0,'ids':[] }
         return  score_choice 
     else:
-        exam_grade = 0
-        score = 0
+        exam_grade = 0        
+        overall = 0 
+        choice_ids = get_submit_choice(choices_submit)
         for question in questions:
-            choice_list = Choice.objects.all().filter(question_id=question.id)            
+            choice_list = Choice.objects.all().filter(question_id=question.id) 
+            score = 0           
             for choice in choice_list:
                 if choice.choice_answer and choice in choices_submit:
                     score += 1
                 elif not choice.choice_answer and  choice in choices_submit:
-                    score = 0            
+                    score = 0 
+                    break
+                elif choice.choice_answer and choice not in choices_submit:
+                    score = score
+            overall += score           
             exam_grade += question.question_grade
-        choice_ids = get_submit_choice(choices_submit)
-        grade = round((score/exam_grade)*100) 
-        score_choice = { 'result':grade,'ids':choice_ids }
+        
+        grade = round((overall/exam_grade)*100) 
+        score_choice = { 'result':grade,'ids':choice_ids}
         return score_choice
     
 def get_lesson(lesson_id):     
